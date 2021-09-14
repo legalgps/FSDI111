@@ -36,7 +36,7 @@ def get_single_user(pk):
     return out
 
 
-@app.route("/users", method=["POST"])
+@app.route("/users", methods=["POST"])
 def create_user():
     out = {
         "status": "ok",
@@ -50,7 +50,7 @@ def create_user():
     )
     return out, 201
 
-@app.route("/users", method=["PUT"])
+@app.route("/users", methods=["PUT"])
 def update_user():
     out = {
         "status": "ok",
@@ -64,6 +64,10 @@ def update_user():
     )
     return out, 201
 
+@app.route('/agent')
+def agent(): 
+    user_agent = request.headers.get("User-Agent")
+    return "<p>Your user agent is %s</p>" % user_agent
 
 
 
