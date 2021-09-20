@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -18,7 +18,7 @@ def home():
         "message": "Success",
         "server_time": datetime.now().strftime("%F %H:%M:%S")
     }
-    return out
+    return render_template("home.html", data=out)
 
 
 @app.route("/users")
@@ -38,7 +38,7 @@ def get_all_users():
         user_dict["active"] = user.active
         out["body"].append(user.dict)               #append temporary dictionary to our empty list
 
-    return out              
+    return render_template("user_list.html", data=out)              
     
 
 
@@ -62,22 +62,11 @@ def get_all_users():
 
 
 @app.route("/users/<int:pk>")
-def get_single_user(pk):
-    out = {
-        "status": "ok",
-        "message": "Success"
-    }
+def get_single_user(pk):  
     user = User.query.filter_by(id=pk).first()
-    out["body"] = {
-        "user": {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "hobbies": user.hobbies,
-            "active": user.active
-        }
-    }
-    return out
+    if user:  
+        return render_template("user_detail.html", user=user)
+    return render_template("404.html"), 404
 
 
 # @app.route("/users", methods=["POST"])
@@ -96,47 +85,52 @@ def get_single_user(pk):
 
 
     
-@app.route("/users" methods=["POST"])
+@app.route("/users", methods=["POST"])
 def create_user():
-    out = {
-        "status": "ok",
-        "message": Success",
-    }
-    user.data = request.json
-    db.session.add(
-        User(
-            first_name = user_data.get("first_name"),
-            last_name = user_data.get("last_name"),
-            hobbies = user_data.get("hobbies")
-        )
-    )
-    db.session.commit()
-
-    return out, 201
-
-
-
-
-
-@app.route("/users", methods=["PUT"])
-def update_user():
     out = {
         "status": "ok",
         "message": "Success"
     }
-    user_data = request.json
-    out["user_id"] = insert(
-        user_data.put("first_name"),
-        user_data.put("last_name"),
-        user_data.put("hobbies")
-    )
+    user.data = request.json
+    # db.session.add(
+    #     User(
+    #         first_name = user_data.get("first_name"),
+    #         last_name = user_data.get("last_name"),
+    #         hobbies = user_data.get("hobbies")
+    #     )
+    # )
+    # db.session.commit()
+
     return out, 201
 
-@app.route('/agent')
-def agent(): 
-    user_agent = request.headers.get("User-Agent")
-    return "<p>Your user agent is %s</p>" % user_agent
 
 
 
 
+# @app.route("/users", methods=["PUT"])
+# def update_user():
+#     out = {
+#         "status": "ok",
+#         "message": "Success"
+#     }
+#     user_data = request.json
+#     out["user_id"] = insert(
+#         user_data.put("first_name"),
+#         user_data.put("last_name"),
+#         user_data.put("hobbies")
+#     )
+#     return out, 201
+
+# @app.route('/agent')
+# def agent(): 
+#     user_agent = request.headers.get("User-Agent")
+#     return "<p>Your user agent is %s</p>" % user_agent
+
+# @app.route("/greeting/<user_name>")
+# def greet_user(user_name):
+#     return render_template("home.html", name=user_name)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
